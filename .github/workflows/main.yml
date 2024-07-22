@@ -10,7 +10,6 @@ on:
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
 
     services:
@@ -34,9 +33,12 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: 7.4
+        php-version: '8.2'
 
-    - name: Install Composer
+    - name: Validate PHP version
+      run: php -v
+
+    - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
 
     - name: Copy .env.example to .env
@@ -65,7 +67,7 @@ jobs:
         DB_PASSWORD: password
       run: php artisan test
 
-    - name: Run Laravel application
+    - name: Serve Laravel application
       run: |
         php artisan serve --host=0.0.0.0 --port=8000 &
         sleep 10
