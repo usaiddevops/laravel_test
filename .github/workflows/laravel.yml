@@ -1,4 +1,4 @@
-name: Laravel Application CI/CD
+name: Laravel CI/CD
 
 on:
   push:
@@ -33,16 +33,24 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: 8.2
+        php-version: '8.2'
 
-    - name: Install Composer
-      run: |
-        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-        php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-        php -r "unlink('composer-setup.php');"
+    - name: Validate PHP version
+      run: php -v
 
     - name: Install Composer dependencies
       run: composer install --prefer-dist --no-progress --no-suggest
+
+    - name: Install Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: Install npm dependencies
+      run: npm install
+
+    - name: Build assets
+      run: npm run build
 
     - name: Copy .env.example to .env
       run: cp .env.example .env
@@ -60,6 +68,15 @@ jobs:
         DB_PASSWORD: password
       run: php artisan migrate --force
 
+    - name: Run tests
+      env:
+        DB_CONNECTION: mysql
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_DATABASE: test_db
+        DB_USERNAME: root
+        DB_PASSWORD: password
+      run: php artisan test
 
     - name: Serve Laravel application
       run: |
