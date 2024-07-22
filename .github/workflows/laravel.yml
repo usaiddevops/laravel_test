@@ -33,14 +33,16 @@ jobs:
     - name: Set up PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: 7.4
+        php-version: 8.2
 
     - name: Install Composer
-      run: composer install --prefer-dist --no-progress --no-suggest || true
+      run: |
+        php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+        php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+        php -r "unlink('composer-setup.php');"
 
-    - name: Update Composer Dependencies (if needed)
-      if: failure()
-      run: composer update --prefer-dist --no-progress --no-suggest
+    - name: Install Composer dependencies
+      run: composer install --prefer-dist --no-progress --no-suggest
 
     - name: Copy .env.example to .env
       run: cp .env.example .env
@@ -68,7 +70,7 @@ jobs:
         DB_PASSWORD: password
       run: php artisan test
 
-    - name: Run Laravel application
+    - name: Serve Laravel application
       run: |
         php artisan serve --host=0.0.0.0 --port=8000 &
         sleep 10
